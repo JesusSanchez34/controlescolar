@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matriz de Horarios - Gobierno del Estado de México</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* 1. PALETA DE COLORES Y FUENTES INSTITUCIONALES */
+        :root {
+            --edomex-primary: #334466;      /* Azul Oscuro, formalidad */
+            --edomex-accent: #007bff;       /* Azul para links y acentos */
+            --edomex-success: #28a745;      /* Verde (Crear/Guardar) */
+            --edomex-danger: #dc3545;       /* Rojo (Eliminar) */
+            --edomex-header-bg: #4a5a7b;    /* Fondo de barra de navegación */
+            --edomex-font: 'Helvetica Neue', Arial, sans-serif;
+            --edomex-cell-bg: #f8f9fa;      /* Fondo de celdas de horario */
+            --edomex-hora-bg: #e9ecef;      /* Fondo para columna de horas */
+        }
+
+        /* TIPOGRAFÍA GENERAL Y TÍTULOS */
+        body {
+            font-family: var(--edomex-font);
+            background-color: #f0f2f5; 
+        }
+        h1, h2, h3, .navbar-brand {
+            font-weight: 700; 
+            color: var(--edomex-primary);
+        }
+
+        /* 2. BARRA DE NAVEGACIÓN (HEADER OFICIAL) */
+        .navbar-edomex {
+            background-color: var(--edomex-header-bg);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-brand {
+            color: white !important;
+            font-size: 1.5rem;
+        }
+
+        /* 3. MATRIZ DE HORARIOS (TABLA PRINCIPAL) */
+        .schedule-matrix {
+            border-collapse: separate;
+            border-spacing: 1px; /* Espacio entre celdas */
+            table-layout: fixed; /* Asegura el mismo ancho */
+            width: 100%;
+        }
+        .schedule-matrix thead th {
+            background-color: var(--edomex-primary);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            padding: 1rem 0.5rem;
+            border: 1px solid var(--edomex-primary);
+        }
+        
+        /* Celdas de tiempo (La primera columna) */
+        .schedule-matrix tbody th {
+            background-color: var(--edomex-hora-bg);
+            color: var(--edomex-primary);
+            font-weight: 600;
+            text-align: center;
+            vertical-align: middle;
+            width: 80px; /* Ancho fijo para las horas */
+        }
+
+        /* Celdas de contenido (Los horarios) */
+        .schedule-matrix tbody td {
+            background-color: var(--edomex-cell-bg);
+            border: 1px solid #dcdcdc;
+            padding: 5px;
+            vertical-align: top;
+            height: 80px; /* Altura de la celda para mejor visualización */
+        }
+        
+        /* Contenedor del horario (La tarjeta interna) */
+        .schedule-slot {
+            background-color: white;
+            border: 2px solid var(--edomex-accent); /* Borde de color de acento */
+            border-radius: 5px;
+            padding: 5px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+        .schedule-slot:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-1px);
+        }
+        .slot-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--edomex-primary);
+            margin-bottom: 2px;
+            line-height: 1;
+        }
+        .slot-info {
+            font-size: 0.7rem;
+            color: #6c757d;
+            line-height: 1.1;
+        }
+
+        /* Estilo para celda libre */
+        .schedule-matrix tbody td.free-slot {
+            text-align: center;
+            color: #adb5bd;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            transition: background-color 0.1s;
+        }
+        .schedule-matrix tbody td.free-slot:hover {
+            background-color: #e0e0e0;
+            cursor: pointer;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-edomex">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <span class="d-none d-md-inline">GOBIERNO DEL ESTADO DE MÉXICO</span> | Matriz Horaria
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="#">Horarios</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid mt-4">
+        <h1 class="mb-4 text-center">Matriz de Horarios Docentes por Día</h1>
+        
+        <div class="row mb-4 px-3">
+            <div class="col-lg-10">
+                <div class="card p-3 shadow-sm" style="border-left: 5px solid var(--edomex-accent);">
+                    <form class="row g-3 align-items-center">
+                        <div class="col-md-4">
+                            <label for="profesor-filtro" class="form-label small text-muted">Filtrar por Profesor:</label>
+                            <select id="profesor-filtro" class="form-select form-select-sm">
+                                <option selected>Todos los Profesores</option>
+                                <option>Lic. Ana Solís</option>
+                                <option>Mtro. Ricardo Peña</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="aula-filtro" class="form-label small text-muted">Filtrar por Aula:</label>
+                            <select id="aula-filtro" class="form-select form-select-sm">
+                                <option selected>Todas las Aulas</option>
+                                <option>A-201</option>
+                                <option>B-105</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 pt-3">
+                            <button type="submit" class="btn btn-edomex-primary w-100">Aplicar Filtros</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-2 d-flex align-items-end justify-content-end mt-3 mt-lg-0">
+                <button class="btn btn-create text-white shadow" data-bs-toggle="modal" data-bs-target="#modalHorario">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-plus me-2" viewBox="0 0 16 16"><path d="M8 7a.5.5 0 0 1 .5.5V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5A.5.5 0 0 1 8 7z"/><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>
+                    Nuevo Horario
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive shadow-lg bg-white p-2 rounded-3">
+            <table class="schedule-matrix">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Hora</th>
+                        <th>Lunes</th>
+                        <th>Martes</th>
+                        <th>Miércoles</th>
+                        <th>Jueves</th>
+                        <th>Viernes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">08:00 - 09:30</th>
+                        <td>
+                            <div class="schedule-slot" data-bs-toggle="modal" data-bs-target="#modalHorario">
+                                <div class="slot-title">Matemáticas IV (A-201)</div>
+                                <div class="slot-info">Lic. Ana Solís</div>
+                            </div>
+                        </td>
+                        <td class="free-slot" data-bs-toggle="modal" data-bs-target="#modalHorario">Libre</td>
+                        <td class="free-slot" data-bs-toggle="modal" data-bs-target="#modalHorario">Libre</td>
+                        <td>
+                            <div class="schedule-slot" data-bs-toggle="modal" data-bs-target="#modalHorario" style="border-color: #7952b3;">
+                                <div class="slot-title">Cálculo Diferencial (B-101)</div>
+                                <div class="slot-info">Mtro. Luis Gómez</div>
+                            </div>
+                        </td>
+                        <td class="free-slot" data-bs-toggle="modal" data-bs-target="#modalHorario">Libre</td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">09:30 - 11:00</th>
+                        <td>
+                             <div class="schedule-slot" data-bs-toggle="modal" data-bs-target="#modalHorario">
+                                <div class="slot-title">Matemáticas IV (A-201)</div>
+                                <div class="slot-info">Lic. Ana Solís</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="schedule-slot" data-bs-toggle="modal" data-bs-target="#modalHorario" style="border-color: #38a587;">
+                                <div class="slot-title">Física I (C-305)</div>
+                                <div class="slot-info">Ing. Karla Díaz</div>
+                            </div>
+                        </td>
+                        <td class="free-slot" data-bs-toggle="modal" data-bs-target="#modalHorario">Libre</td>
+                        <td>
+                             <div class="schedule-slot" data-bs-toggle="modal" data-bs-target="#modalHorario" style="border-color: #7952b3;">
+                                <div class="slot-title">Cálculo Diferencial (B-101)</div>
+                                <div class="slot-info">Mtro. Luis Gómez</div>
+                            </div>
+                        </td>
+                        <td class="free-slot" data-bs-toggle="modal" data-bs-target="#modalHorario">Libre</td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">11:00 - 12:30</th>
+                        <td class="free-slot" data-bs-toggle="modal" data-bs-target="#modalHorario">Libre</td>
+                        <td class="free-slot" data-bs-toggle="modal" data-bs-target="#modalHorario">Libre</td>
+                        <td>
+                            <div class="schedule-slot" data-bs-toggle="modal" data-bs-target="#modalHorario" style="border-color: #e44d26;">
+                                <div class="slot-title">Redacción Técnica (D-402)</div>
+                                <div class="slot-info">Dr. Juan Pérez</div>
+                            </div>
+                        </td>
+                        <td class="free-slot" data-bs-toggle="modal" data-bs-target="#modalHorario">Libre</td>
+                        <td>
+                            <div class="schedule-slot" data-bs-toggle="modal" data-bs-target="#modalHorario" style="border-color: #00bcd4;">
+                                <div class="slot-title">Programación I (Lab 1)</div>
+                                <div class="slot-info">Ing. María Torres</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div class="modal fade" id="modalHorario" tabindex="-1" aria-labelledby="modalHorarioLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="modalHorarioLabel">Registro de Horario Docente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <h6 class="text-primary mb-3">Datos del Horario</h6>
+                        <div class="mb-3">
+                            <label for="input-profesor" class="form-label">Profesor(a) Asignado:</label>
+                            <select class="form-select" id="input-profesor" required><option selected disabled value="">Seleccione...</option><option>Lic. Ana Solís</option><option>Mtro. Ricardo Peña</option></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="input-materia" class="form-label">Materia y Grupo:</label>
+                            <input type="text" class="form-control" id="input-materia" required placeholder="Ej: Matemáticas IV (Gpo A)">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="input-dia" class="form-label">Día:</label>
+                                <select class="form-select" id="input-dia" required><option selected disabled value="">Día</option><option>Lunes</option><option>Martes</option></select>
+                            </div>
+                            <div class="col-6">
+                                <label for="input-aula" class="form-label">Aula:</label>
+                                <input type="text" class="form-control" id="input-aula" required placeholder="Ej: A-201">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="input-inicio" class="form-label">Hora de Inicio:</label>
+                                <input type="time" class="form-control" id="input-inicio" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="input-fin" class="form-label">Hora de Fin:</label>
+                                <input type="time" class="form-control" id="input-fin" required>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 pt-3">
+                             <button type="submit" class="btn btn-create btn-lg text-white" style="background-color: var(--edomex-success);">
+                                Guardar Horario
+                            </button>
+                            <button type="button" class="btn btn-danger-custom btn-sm" data-bs-toggle="modal" data-bs-target="#modalEliminar">
+                                Eliminar este registro
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header bg-danger bg-opacity-25">
+                    <h5 class="modal-title text-danger" id="modalEliminarLabel">¡Alerta! Acción Crítica</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="mb-3">¿Confirma que desea **eliminar** este horario?</p>
+                    <p class="text-muted small">Esta acción no se puede deshacer.</p>
+                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-delete text-white" style="background-color: var(--edomex-danger);">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // JS para cambiar el título del modal según sea "Crear" o "Editar"
+        document.getElementById('modalHorario').addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var modalTitle = document.getElementById('modalHorarioLabel');
+            
+            if (button && (button.closest('.schedule-slot') || button.textContent.trim() === 'Editar')) {
+                modalTitle.textContent = 'Editar Horario Existente';
+                // Lógica para cargar los datos...
+            } else {
+                modalTitle.textContent = 'Registrar Nuevo Horario';
+                // Lógica para resetear el formulario...
+            }
+        });
+    </script>
+</body>
+</html>

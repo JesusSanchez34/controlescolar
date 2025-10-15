@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario de Inscripción - Gobierno del Estado de México</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      background-color: #8c1b1b;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      border-bottom: 5px solid #b31c1c;
+    }
+
+    header img {
+      width: 120px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin: 0;
+    }
+
+    form {
+      background-color: white;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-top: 8px solid #8c1b1b;
+    }
+
+    fieldset {
+      border: none;
+      margin-bottom: 25px;
+    }
+
+    legend {
+      font-weight: bold;
+      color: #8c1b1b;
+      font-size: 1.2rem;
+      border-bottom: 2px solid #8c1b1b;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+      border-color: #8c1b1b;
+      outline: none;
+      box-shadow: 0 0 5px rgba(140, 27, 27, 0.4);
+    }
+
+    button {
+      background-color: #8c1b1b;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #a32626;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 0.9rem;
+      color: #555;
+      background-color: #eaeaea;
+      border-top: 1px solid #ccc;
+    }
+
+    @media (max-width: 600px) {
+      form {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/43/Edomex_logo.png" alt="Gobierno del Estado de México">
+    <h1>Formulario de Inscripción de Alumnos</h1>
+    <p>Secretaría de Educación - Gobierno del Estado de México</p>
+  </header>
+
+  <form>
+    <fieldset>
+      <legend>Datos Personales</legend>
+      <label for="nombre">Nombre completo:</label>
+      <input type="text" id="nombre" name="nombre" required>
+
+      <label for="curp">CURP:</label>
+      <input type="text" id="curp" name="curp" maxlength="18" required>
+
+      <label for="fecha-nacimiento">Fecha de nacimiento:</label>
+      <input type="date" id="fecha-nacimiento" name="fecha-nacimiento" required>
+
+      <label for="sexo">Sexo:</label>
+      <select id="sexo" name="sexo" required>
+        <option value="">Seleccione una opción</option>
+        <option value="femenino">Femenino</option>
+        <option value="masculino">Masculino</option>
+      </select>
+    </fieldset>
+
+    <fieldset>
+      <legend>Información Académica</legend>
+      <label for="nivel">Nivel educativo:</label>
+      <select id="nivel" name="nivel" required>
+        <option value="">Seleccione una opción</option>
+        <option value="preescolar">Preescolar</option>
+        <option value="primaria">Primaria</option>
+        <option value="secundaria">Secundaria</option>
+        <option value="media-superior">Media Superior</option>
+        <option value="superior">Superior</option>
+      </select>
+
+      <label for="escuela">Nombre de la escuela:</label>
+      <input type="text" id="escuela" name="escuela" required>
+
+      <label for="matricula">Número de matrícula (si aplica):</label>
+      <input type="text" id="matricula" name="matricula">
+    </fieldset>
+
+    <fieldset>
+      <legend>Contacto</legend>
+      <label for="correo">Correo electrónico:</label>
+      <input type="email" id="correo" name="correo" required>
+
+      <label for="telefono">Teléfono:</label>
+      <input type="tel" id="telefono" name="telefono" pattern="[0-9]{10}" placeholder="Ej. 5512345678" required>
+
+      <label for="direccion">Dirección completa:</label>
+      <input type="text" id="direccion" name="direccion" required>
+    </fieldset>
+
+    <button type="submit">Enviar inscripción</button>
+  </form>
+
+  <footer>
+    &copy; 2025 Gobierno del Estado de México - Secretaría de Educación<br>
+    Todos los derechos reservados.
+  </footer>
+
+</body>
+</html>
